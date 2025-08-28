@@ -1,0 +1,40 @@
+name: app
+namespace: local-services
+
+imageRepo: ghcr.io/wellrcosta/app
+tag: latest
+pullPolicy: IfNotPresent
+imagePullSecrets: [] # ex.: [registry-cred]
+
+replicas: 2
+port: 3000
+
+expose: internal # "internal" ou "http"
+host: "" # ex.: pedidos.192.168.1.150.nip.io
+ingressClassName: traefik
+ingressAnnotations: {}
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+
+readinessProbe:
+  enabled: false
+  path: /health
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+livenessProbe:
+  enabled: false
+  path: /health
+  initialDelaySeconds: 15
+  periodSeconds: 20
+
+cron:
+  enabled: false
+  schedule: "*/5 * * * *"
+  command: ["node", "scripts/run-cron.js"]

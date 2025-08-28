@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: local-services
+  namespace: argocd
+spec:
+  generators:
+    - scmProvider:
+        github:
+          owner: wellrcosta
+        filters:
+          - pathExists: "deploy.values.yaml"
+  template:
+    metadata:
+      name: "{{ repository }}-app"
+      labels:
+        managed-by: application-set
+    spec:
+      project: default
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: local-services
+      sources:
+        - repoURL: https://github.com/wellrcosta/infra-local.git
+          targetRevision: main
+          path: charts/app
+          helm:
+            valueFiles:
+              - "$values/deploy.values.yaml"
+        - repoURL: "https://github.com/{{ repositoryOwner }}/{{ repositoryName }}.git"
+          targetRevision: main
+          ref: values

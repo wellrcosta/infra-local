@@ -1,0 +1,37 @@
+{{- if .Values.cron.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.name }}-cron
+  namespace: {{ .Values.namespace }}
+spec:
+  schedule: "{{ .Values.cron.schedule }}"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          {{- if .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- range .Values.imagePullSecrets }}
+            - name: {{ . }}
+            {{- end }}
+          {{- end }}
+          containers:
+            - name: {{ .Values.name }}-cron
+              image: "{{ .Values.imageRepo }}:{{ .Values.tag }}"
+              imagePullPolicy: {{ .Values.pullPolicy }}
+              command: {{- toYaml .Values.cron.command | nindent 16 }}
+              envFrom:
+                - secretRef:
+                    name: {{ .Values.name }}-secrets
+              volumeMounts:
+                - name: dotenv
+                  mountPath: /app/.env
+                  subPath: dotenv
+                  readOnly: true
+          volumes:
+            - name: dotenv
+              secret:
+                secretName: {{ .Values.name }}-secrets
+{{- end }}
