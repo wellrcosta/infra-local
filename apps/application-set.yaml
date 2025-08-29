@@ -7,20 +7,19 @@ spec:
   generators:
     - scmProvider:
         github:
-          owner: wellrcosta
+          organization: Infra-Reis
+          allBranches: false
+          tokenRef:
+            secretName: github-token
+            key: token
         filters:
-          - pathExists: "deploy.values.yaml"
+          - pathsExist:
+              - deploy.values.yaml
   template:
     metadata:
-      name: "{{ repository }}-app"
-      labels:
-        managed-by: application-set
+      name: "{{repository}}-app"
     spec:
       project: default
-      syncPolicy:
-        automated:
-          prune: true
-          selfHeal: true
       destination:
         server: https://kubernetes.default.svc
         namespace: local-services
@@ -30,7 +29,13 @@ spec:
           path: charts/app
           helm:
             valueFiles:
-              - "$values/deploy.values.yaml"
-        - repoURL: "https://github.com/{{ repositoryOwner }}/{{ repositoryName }}.git"
-          targetRevision: main
+              - $values/deploy.values.yaml
+        - repoURL: "{{url}}"
+          targetRevision: "{{branch}}"
           ref: values
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+      syncOptions:
+        - CreateNamespace=true
