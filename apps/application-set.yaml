@@ -9,6 +9,7 @@ spec:
         github:
           organization: Infra-Reis
           allBranches: false
+          cloneProtocol: https
           tokenRef:
             secretName: github-token
             key: token
