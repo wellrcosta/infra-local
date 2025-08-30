@@ -9,7 +9,6 @@ spec:
         github:
           organization: Infra-Reis
           allBranches: false
-          cloneProtocol: https
           tokenRef:
             secretName: github-token
             key: token
@@ -31,7 +30,7 @@ spec:
           helm:
             valueFiles:
               - $values/deploy.values.yaml
-        - repoURL: "{{url}}"
+        - repoURL: https://github.com/Infra-Reis/{{repository}}.git
           targetRevision: "{{branch}}"
           ref: values
       syncPolicy:
